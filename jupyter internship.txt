@@ -1,0 +1,79 @@
+import pandas as pd
+
+IMPORTING THE DATA SETS :
+
+data_set=pd.read_csv("fraudTest.csv")
+data_set
+data_set1=pd.read_csv("fraudTrain.csv")
+data_set.info()
+data_set1.info()
+data_set.isnull().sum()
+data_set1.isnull().sum()
+
+
+DROPPING COLUMNS IN THE EXISTING DATASET:
+
+data_set.gender=[0 if value == "M" else 1 for value in data_set.gender]
+data_set
+data_set1.gender=[0 if value == "M" else 1 for value in data_set1.gender]
+data_set['data_set_lat_dist']=abs(round(data_set['merch_lat']-data_set['lat'],2))
+data_set['data_set_long_dist']=abs(round(data_set['merch_long']-data_set['long'],2))
+data_set1['data_set_lat_dist']=abs(round(data_set1['merch_lat']-data_set1['lat'],2))
+data_set1['data_set_long_dist']=abs(round(data_set1['merch_long']-data_set1['long'],2))
+data_set.drop(['first','last','merch_lat','merch_long','dob','merchant','cc_num','category','unix_time','street','Unnamed: 0'], axis=1, inplace=True)
+data_set1.drop(['first','last','merch_lat','merch_long','dob','merchant','cc_num','category','unix_time','street','Unnamed: 0'], axis=1, inplace=True)
+data_set.drop(['city','state','lat','long','job','trans_num'], axis=1, inplace=True)
+data_set1.drop(['city','state','lat','long','job','trans_num'], axis=1, inplace=True)
+data_set
+data_set1
+
+
+SPLITTING THE DATA INTO TRAIN AND SPLIT:
+
+X_train= data_set1.drop('is_fraud',axis=1)
+X_test = data_set.drop('is_fraud',axis=1)
+y_train = data_set1['is_fraud']
+y_test = data_set['is_fraud']
+X_test.drop(['trans_date_trans_time'],axis=1,inplace=True)
+X_train.drop(['trans_date_trans_time'],axis=1,inplace=True)
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+scaler.fit(X_train)
+x_train=scaler.transform(X_train)
+x_test=scaler.transform(X_test)
+X_train.to_csv("x_train.csv")
+
+
+IMPLEMENTING THE ML MODELS:
+
+
+LogisticRegression:
+from sklearn.linear_model import LogisticRegression
+Lr=LogisticRegression()
+Lr.fit(X_train,y_train)
+from sklearn.metrics import accuracy_score, classification_report
+y_logistic = Lr.predict(X_test)
+accuracy_logistic = accuracy_score(y_test, y_logistic)
+accuracy_logistic
+print("\nClassification Report : Logistic Regression \n", classification_report(y_test, y_logistic))
+
+
+ RandomForestClassifier:
+from sklearn.ensemble import RandomForestClassifier
+random = RandomForestClassifier()
+random.fit(X_train,y_train)
+y_val = random.predict(X_test)
+accuracy = accuracy_score(y_test, y_val)
+print(f'Accuracy: {accuracy:.2f}')
+print("\n Random Forest \n", classification_report(y_test, y_val))
+
+
+
+DecisionTreeClassifier:
+from sklearn.tree import DecisionTreeClassifier
+Decision_tree = DecisionTreeClassifier(random_state = 42)
+Decision_tree.fit(X_train,y_train)
+y_pred = Decision_tree.predict(X_test)
+accuracy = accuracy_score(y_test, y_pred)
+print(f'Decision Tree {accuracy:.2f}')
+print("\n Decision Tree \n", classification_report(y_test, y_pred))
