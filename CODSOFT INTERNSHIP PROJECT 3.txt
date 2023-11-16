@@ -1,0 +1,99 @@
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+IMPORTING THE DATA SET INTO OUR NOTEBOOK: 
+
+data_set_train=pd.read_table("C:\\Users\\Admin\\Desktop\\train_data.txt",sep=' ::: ',header=None,engine='python', names=['title','Genre','Description'])
+data_set_test=pd.read_table("C:\\Users\\Admin\\Desktop\\test_data.txt",sep=' ::: ',header=None,engine='python', names=['ID','title','Description'])
+data_set_test
+data_set_train['Genre'].value_counts()
+data_set_test.info()
+data_set_train.info()
+data_set_train.Genre.value_counts().plot(kind='bar')
+plt.show()
+data_set_test
+data_set_train
+
+CLEANING OUR EXISTING DATASET(TOKENIZING):
+
+import re
+import nltk
+def evacuation_lines(data):
+    data=data.lower()
+    #data=re.sub(r'@\S+','',data)
+    data=re.sub(r"[^a-z A-Z+']",'',data)
+    
+    
+    
+    data=re.sub(r'http\S+', '',data)
+    data=re.sub(r'\s+[a-zA-Z]\s+', ' ', data + ' ')
+    #print(data)
+    words_clean=nltk.word_tokenize(data)
+    #print(words_clean)
+    sw= nltk.corpus.stopwords.words('english')
+    data= " ".join([i for i in words_clean if i not in sw and len(i) > 2])
+    data=re.sub("\s[\s]+", " ", data).strip()  # Remove repeated/leading/trailing spaces
+    
+    return data
+
+
+data_set_test['upgraded_text'] = data_set_test['Description'].apply(evacuation_lines)
+data_set_train['upgraded_text'] = data_set_train['Description'].apply(evacuation_lines)
+
+
+SPLITTING THE DATASET INTO X AND Y FOR MODEL IMPLEMENTATION , TESTING:
+
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
+tfidf = TfidfVectorizer()
+X_train = tfidf.fit_transform(data_set_train['upgraded_text'])
+X_test = tfidf.transform(data_set_test['upgraded_text'])
+X=X_train
+Y=data_set_train['Genre']
+X_train , X_test, Y_train, Y_test = train_test_split(X,Y, test_size=0.2 , random_state=41)
+
+
+IMPLEMENTING ML MODELS INTO OUR DATA SET:
+
+LogisticRegression:
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score 
+from sklearn.metrics import classification_report
+model_project3=LogisticRegression()
+model_project3.fit(X_train,Y_train)
+predict=model_project3.predict(X_test)
+accuracy_value=accuracy_score(Y_test,predict)
+classification=classification_report(Y_test,predict)
+print("Logistic Regression:\n ")
+print ("the classification of the model is:", classification)
+print ("the accuracy value is :", accuracy_value)
+
+
+Naive Bayes:
+
+from sklearn.naive_bayes import MultinomialNB
+Naive_B=MultinomialNB()
+Naive_B.fit(X_train,Y_train)
+predict2=Naive_B.predict(X_test)
+accuracy_value2=accuracy_score(Y_test,predict2)
+classification2=classification_report(Y_test,predict2)
+print("Naive Bayes:\n ")
+print ("the classification of the model is:", classification2)
+print ("the accuracy value is :", accuracy_value2)
+
+
+SVC:
+
+from sklearn.svm import SVC
+model_sv=SVC()
+model_sv.fit(X_train,Y_train)
+predict3=model_sv.predict(X_test)
+accuracy_value3=accuracy_score(Y_test,predict3)
+classification3=classification_report(Y_test,predict3)
+print("support vector machine classifier:\n ")
+print ("the classification of the model is :", classification3)
+print ("the accuracy value is :", accuracy_value3)
